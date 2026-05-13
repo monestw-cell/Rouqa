@@ -228,11 +228,11 @@ class AnalysisBackpressure {
         continue;
       }
 
-      if (lowestSeq == null || item.sequenceNumber < lowestSeq) {
+      if (lowestSeq == null || (item.sequenceNumber ?? 0) < (lowestSeq ?? 0)) {
         // نُسقط الأقدم (أقل تسلسل) من الأولوية الأقل
         if (lowestItem == null ||
             item.priority.index > lowestItem.priority.index ||
-            (item.priority == lowestItem.priority && item.sequenceNumber < lowestSeq)) {
+            (item.priority == lowestItem.priority && (item.sequenceNumber ?? 0) < (lowestSeq ?? 0)) {
           lowestItem = item;
           lowestSeq = item.sequenceNumber;
         }
