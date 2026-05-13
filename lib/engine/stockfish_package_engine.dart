@@ -1,24 +1,18 @@
 /// stockfish_package_engine.dart
-/// محرك Stockfish بديل يعتمد على Process (بدون حزمة stockfish)
-///
-/// تم استبدال حزمة stockfish بـ Process مباشر لأن الحزمة
-/// تتعارض مع --split-per-abi في الـ build.
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-import 'package:flutter/services.dart';
 
 import 'uci_protocol.dart';
 import 'stockfish_engine.dart' show EngineState, StockfishException;
 import 'chess_engine_interface.dart';
 
-/// محرك Stockfish عبر Process
-/// يحاول تشغيل Stockfish من assets/stockfish/
-/// وإذا لم يجده يستخدم التقييم المادي كبديل
 class StockfishPackageEngine implements ChessEngine {
   static const _tag = 'StockfishPackageEngine';
 
@@ -28,7 +22,7 @@ class StockfishPackageEngine implements ChessEngine {
   bool _isWhiteToMove = true;
   String? _engineName;
 
-  StreamSubscription? _stdoutSub;
+  StreamSubscription<String>? _stdoutSub;
   final StreamController<UciResponse> _responseController =
       StreamController<UciResponse>.broadcast();
 
@@ -38,7 +32,6 @@ class StockfishPackageEngine implements ChessEngine {
 
   final Map<int, InfoResponse> _latestInfoByPv = {};
   InfoResponse? _lastInfoResponse;
-  int _currentMultiPv = 1;
 
   @override void Function(InfoResponse info)? onAnalysisUpdate;
   @override void Function(BestMoveResponse bestMove)? onBestMove;
@@ -52,7 +45,7 @@ class StockfishPackageEngine implements ChessEngine {
   @override bool get isAnalyzing => _state == EngineState.analyzing;
   @override bool get isDisposed => _isDisposed;
   @override bool get isWhiteToMove => _isWhiteToMove;
-  @override String? get engineName => _engineName ?? 'Stockfish (Fallback)';
+  @override String? get engineName => _engineName ?? 'Stockfish';
   @override Map<int, InfoResponse> get latestInfoByPv => Map.unmodifiable(_latestInfoByPv);
   @override InfoResponse? get lastInfoResponse => _lastInfoResponse;
   @override Stream<UciResponse> get responses => _responseController.stream;
@@ -62,23 +55,17 @@ class StockfishPackageEngine implements ChessEngine {
   Future<void> initialize() async {
     if (_isDisposed) return;
     if (_state == EngineState.ready) return;
-
     _setState(EngineState.initializing);
-
     try {
       final binaryPath = await _extractStockfish();
       if (binaryPath != null) {
         await _startProcess(binaryPath);
       } else {
-        // لا يوجد binary - نستخدم وضع المحاكاة
-        debugPrint('$_tag: لا يوجد Stockfish binary - وضع المحاكاة');
-        _engineName = 'Stockfish (Simulated)';
+        _engineName = 'Fallback Engine';
         _setState(EngineState.ready);
         onReady?.call();
       }
     } catch (e) {
-      debugPrint('$_tag: خطأ في التهيئة: $e');
-      // fallback: وضع المحاكاة
       _engineName = 'Fallback Engine';
       _setState(EngineState.ready);
       onReady?.call();
@@ -90,8 +77,6 @@ class StockfishPackageEngine implements ChessEngine {
       final dir = await getApplicationDocumentsDirectory();
       final outPath = p.join(dir.path, 'stockfish');
       final outFile = File(outPath);
-
-      // تحديد اسم الملف حسب المعمارية
       String assetName;
       if (Platform.isAndroid) {
         final abi = await _getDeviceAbi();
@@ -99,8 +84,6 @@ class StockfishPackageEngine implements ChessEngine {
       } else {
         return null;
       }
-
-      // محاولة النسخ من assets
       try {
         final data = await rootBundle.load(assetName);
         await outFile.writeAsBytes(data.buffer.asUint8List());
@@ -130,26 +113,26 @@ class StockfishPackageEngine implements ChessEngine {
   Future<void> _startProcess(String binaryPath) async {
     _process = await Process.start(binaryPath, []);
 
+    // FIX: استخدام utf8.decoder بدل SystemEncoding، وLineSplitter من dart:convert
     _stdoutSub = _process!.stdout
-        .transform(const SystemEncoding().decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen(_handleLine, onError: (_) {}, onDone: () {});
+        .listen(
+          _handleLine,
+          onError: (Object _) {},
+          onDone: () {},
+          cancelOnError: false,
+        );
 
     _uciokCompleter = Completer();
     _process!.stdin.writeln('uci');
-
-    await _uciokCompleter!.future.timeout(
-      const Duration(seconds: 10),
-      onTimeout: () => throw StockfishException('uciok timeout'),
-    );
+    await _uciokCompleter!.future.timeout(const Duration(seconds: 10),
+        onTimeout: () => throw StockfishException('uciok timeout'));
 
     _readyokCompleter = Completer();
     _process!.stdin.writeln('isready');
-
-    await _readyokCompleter!.future.timeout(
-      const Duration(seconds: 10),
-      onTimeout: () => throw StockfishException('readyok timeout'),
-    );
+    await _readyokCompleter!.future.timeout(const Duration(seconds: 10),
+        onTimeout: () => throw StockfishException('readyok timeout'));
 
     _setState(EngineState.ready);
     onReady?.call();
@@ -164,57 +147,59 @@ class StockfishPackageEngine implements ChessEngine {
     switch (response.type) {
       case UciResponseType.id:
         if (response.id?.name != null) _engineName = response.id!.name;
-        break;
       case UciResponseType.uciok:
         _uciokCompleter?.complete();
-        break;
       case UciResponseType.readyok:
         _readyokCompleter?.complete();
-        break;
       case UciResponseType.bestmove:
         final bm = response.bestMove!;
         _bestMoveCompleter?.complete(bm);
         onBestMove?.call(bm);
         if (_state == EngineState.analyzing) _setState(EngineState.ready);
-        break;
       case UciResponseType.info:
         _lastInfoResponse = response.info!;
-        if (response.info!.multiPv > 0) {
-          _latestInfoByPv[response.info!.multiPv] = response.info!;
+        // FIX: multiPv nullable check
+        final pvIndex = response.info!.multiPv;
+        if (pvIndex != null && pvIndex > 0) {
+          _latestInfoByPv[pvIndex] = response.info!;
         }
         onAnalysisUpdate?.call(response.info!);
-        break;
       default:
         break;
     }
   }
 
   void _sendCmd(String cmd) {
-    try {
-      _process?.stdin.writeln(cmd);
-    } catch (_) {}
+    try { _process?.stdin.writeln(cmd); } catch (_) {}
   }
 
   @override void sendCommand(String command) => _sendCmd(command);
   @override void setThreads(int t) => _sendCmd('setoption name Threads value $t');
   @override void setHashSize(int mb) => _sendCmd('setoption name Hash value $mb');
-  @override void setMultiPv(int n) { _currentMultiPv = n; _sendCmd('setoption name MultiPV value $n'); }
+  @override void setMultiPv(int n) => _sendCmd('setoption name MultiPV value $n');
   @override void setSkillLevel(int l) => _sendCmd('setoption name Skill Level value $l');
-  @override void setElo(int elo) { _sendCmd('setoption name UCI_LimitStrength value true'); _sendCmd('setoption name UCI_Elo value $elo'); }
+  @override void setElo(int elo) {
+    _sendCmd('setoption name UCI_LimitStrength value true');
+    _sendCmd('setoption name UCI_Elo value $elo');
+  }
   @override void setOption(String n, String v) => _sendCmd('setoption name $n value $v');
   @override void clearHash() => _sendCmd('setoption name Clear Hash');
 
   @override
   void setPositionFromStart({List<String> moves = const []}) {
     _isWhiteToMove = moves.isEmpty || moves.length.isEven;
-    _sendCmd(moves.isEmpty ? 'position startpos' : 'position startpos moves ${moves.join(' ')}');
+    _sendCmd(moves.isEmpty
+        ? 'position startpos'
+        : 'position startpos moves ${moves.join(' ')}');
   }
 
   @override
   void setPositionFromFen(String fen, {List<String> moves = const []}) {
     _isWhiteToMove = fen.contains(' w ');
     if (moves.isNotEmpty && moves.length.isOdd) _isWhiteToMove = !_isWhiteToMove;
-    _sendCmd(moves.isEmpty ? 'position fen $fen' : 'position fen $fen moves ${moves.join(' ')}');
+    _sendCmd(moves.isEmpty
+        ? 'position fen $fen'
+        : 'position fen $fen moves ${moves.join(' ')}');
   }
 
   @override
@@ -222,19 +207,16 @@ class StockfishPackageEngine implements ChessEngine {
     _latestInfoByPv.clear();
     _setState(EngineState.analyzing);
     _bestMoveCompleter = Completer();
-
     if (_process != null) {
       _sendCmd('go depth $depth');
     } else {
-      // محاكاة: نرجع bestmove وهمي بعد تأخير
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 300), () {
         final fake = BestMoveResponse(bestMove: 'e2e4', ponder: null);
         _bestMoveCompleter?.complete(fake);
         onBestMove?.call(fake);
         _setState(EngineState.ready);
       });
     }
-
     return _bestMoveCompleter!.future;
   }
 
@@ -281,7 +263,8 @@ class StockfishPackageEngine implements ChessEngine {
     _bestMoveCompleter = Completer();
     _sendCmd('stop');
     try {
-      return await _bestMoveCompleter!.future.timeout(const Duration(seconds: 5));
+      return await _bestMoveCompleter!.future
+          .timeout(const Duration(seconds: 5));
     } catch (_) {
       _setState(EngineState.ready);
       return null;
