@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 import '../core/constants.dart';
+import 'package:flutter/foundation.dart';
 
 // ─── نتيجة مقسمة إلى صفحات — Paginated Result (حل مشكلة #11) ──────────────
 
