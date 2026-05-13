@@ -1,0 +1,162 @@
+[
+  {
+    "eco": "B12",
+    "name_ar": "دفاع كارو-كان: نسخة المتابعة",
+    "name_en": "Caro-Kann Defense: Advance Variation",
+    "moves": "e4 c6 d4 d5 e5",
+    "category": "semi-open",
+    "description_ar": "دفاع متين يتميز بمتانة البنية البيادقية للأسود"
+  },
+  {
+    "eco": "B20",
+    "name_ar": "دفاع صقلية",
+    "name_en": "Sicilian Defense",
+    "moves": "e4 c5",
+    "category": "semi-open",
+    "description_ar": "أشهر دفاع ضد بيادق الملك"
+  },
+  {
+    "eco": "B90",
+    "name_ar": "دفاع صقلية: ناجدورف",
+    "name_en": "Sicilian Defense: Najdorf",
+    "moves": "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6",
+    "category": "semi-open",
+    "description_ar": "أقوى نسخة صقلية"
+  },
+  {
+    "eco": "B70",
+    "name_ar": "دفاع صقلية: تنين",
+    "name_en": "Sicilian Defense: Dragon",
+    "moves": "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 g6",
+    "category": "semi-open",
+    "description_ar": "نسخة هجومية شرسة"
+  },
+  {
+    "eco": "C42",
+    "name_ar": "دفاع بيتروف",
+    "name_en": "Petrov's Defense",
+    "moves": "e4 e5 Nf3 Nf6",
+    "category": "open",
+    "description_ar": "دفاع متماثل يعتمد على الهجوم المضاد"
+  },
+  {
+    "eco": "C50",
+    "name_ar": "لعبة إيطالية",
+    "name_en": "Italian Game",
+    "moves": "e4 e5 Nf3 Nc6 Bc4",
+    "category": "open",
+    "description_ar": "واحدة من أقدم الافتتاحيات"
+  },
+  {
+    "eco": "C65",
+    "name_ar": "روي لوبيز: بيرلين",
+    "name_en": "Ruy Lopez: Berlin Defense",
+    "moves": "e4 e5 Nf3 Nc6 Bb5 Nf6",
+    "category": "open",
+    "description_ar": "دفاع كرامنيك ضد كاسباروف"
+  },
+  {
+    "eco": "C84",
+    "name_ar": "روي لوبيز: مغلقة",
+    "name_en": "Ruy Lopez: Closed",
+    "moves": "e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O",
+    "category": "open",
+    "description_ar": "النسخة الرئيسية من روي لوبيز"
+  },
+  {
+    "eco": "C00",
+    "name_ar": "الدفاع الفرنسي",
+    "name_en": "French Defense",
+    "moves": "e4 e6",
+    "category": "semi-open",
+    "description_ar": "دفاع متين يضيق المركز"
+  },
+  {
+    "eco": "C18",
+    "name_ar": "الدفاع الفرنسي: ويناور",
+    "name_en": "French Defense: Winawer",
+    "moves": "e4 e6 d4 d5 Nc3 Bb4",
+    "category": "semi-open",
+    "description_ar": "النسخة الأكثر حدة في الفرنسي"
+  },
+  {
+    "eco": "D06",
+    "name_ar": "مرفوض الوزير",
+    "name_en": "Queen's Gambit",
+    "moves": "d4 d5 c4",
+    "category": "closed",
+    "description_ar": "أشهر افتتاحية بيادق الوزير"
+  },
+  {
+    "eco": "E60",
+    "name_ar": "دفاع نيمزو-هندي",
+    "name_en": "Nimzo-Indian Defense",
+    "moves": "d4 Nf6 c4 e6 Nc3 Bb4",
+    "category": "closed",
+    "description_ar": "واحد من أقوى الدفوعات"
+  },
+  {
+    "eco": "D10",
+    "name_ar": "دفاع سلاف",
+    "name_en": "Slav Defense",
+    "moves": "d4 d5 c4 c6",
+    "category": "closed",
+    "description_ar": "دفاع متين يحافظ على الفيل"
+  },
+  {
+    "eco": "D02",
+    "name_ar": "لعبة لندن",
+    "name_en": "London System",
+    "moves": "d4 d5 Bf4",
+    "category": "closed",
+    "description_ar": "نظام متين وسهل"
+  },
+  {
+    "eco": "A20",
+    "name_ar": "الافتتاحية الإنجليزية",
+    "name_en": "English Opening",
+    "moves": "c4",
+    "category": "flank",
+    "description_ar": "افتتاحية مرنة تبدأ ببيدق c"
+  },
+  {
+    "eco": "A07",
+    "name_ar": "افتتاحية ريتي",
+    "name_en": "Reti Opening",
+    "moves": "Nf3 d5 g3",
+    "category": "flank",
+    "description_ar": "افتتاحية فيانكتو مرنة"
+  },
+  {
+    "eco": "B01",
+    "name_ar": "دفاع اسكندنافيا",
+    "name_en": "Scandinavian Defense",
+    "moves": "e4 d5",
+    "category": "semi-open",
+    "description_ar": "دفاع مباشر يهاجم المركز"
+  },
+  {
+    "eco": "B06",
+    "name_ar": "دفاع بيرك",
+    "name_en": "Pirc Defense",
+    "moves": "e4 d6 d4 Nf6 Nc3 g6",
+    "category": "semi-open",
+    "description_ar": "دفاع فائق المرونة"
+  },
+  {
+    "eco": "A80",
+    "name_ar": "الدفاع الهولندي",
+    "name_en": "Dutch Defense",
+    "moves": "d4 f5",
+    "category": "closed",
+    "description_ar": "دفاع هجومي يسيطر على المركز"
+  },
+  {
+    "eco": "D06",
+    "name_ar": "دفاع الهندي الملكي",
+    "name_en": "King's Indian Defense",
+    "moves": "d4 Nf6 c4 g6",
+    "category": "closed",
+    "description_ar": "دفاع استراتيجي قوي"
+  }
+]

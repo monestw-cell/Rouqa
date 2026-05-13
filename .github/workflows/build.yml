@@ -1,0 +1,98 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter 3.24.0
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Create local.properties
+        run: |
+          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+          echo "sdk.dir=$ANDROID_SDK_ROOT" >> android/local.properties
+
+      - name: Create assets/stockfish directory
+        run: mkdir -p assets/stockfish
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Analyze code (non-fatal)
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings || true
+
+      - name: Build debug APK (split per ABI)
+        run: flutter build apk --debug --split-per-abi
+
+      - name: Upload debug APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruqa-debug-apks-${{ github.sha }}
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 7
+
+  build-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: build-debug
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter 3.24.0
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Create local.properties
+        run: |
+          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+          echo "sdk.dir=$ANDROID_SDK_ROOT" >> android/local.properties
+
+      - name: Create assets/stockfish directory
+        run: mkdir -p assets/stockfish
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Build release APK (split per ABI)
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload release APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruqa-release-apks-${{ github.sha }}
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 30

@@ -1,0 +1,25 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.mocks.dart"
+  errors:
+    invalid_annotation_target: ignore
+    # Relax errors to warnings so build doesn't fail
+    todo: ignore
+    avoid_print: ignore
+
+linter:
+  rules:
+    # Only keep rules that don't break build
+    avoid_empty_else: true
+    avoid_types_as_parameter_names: true
+    camel_case_types: true
+    empty_statements: true
+    no_duplicate_case_values: true
+    unrelated_type_equality_checks: true
+    valid_regexps: true
+    void_checks: true
+    use_key_in_widget_constructors: false

@@ -1,0 +1,47 @@
+name: ruqa
+description: رُقعة — Chess Analyzer App
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.1
+  chess: ^0.8.1
+  sqflite: ^2.3.3+1
+  path: ^1.9.0
+  path_provider: ^2.1.3
+  fl_chart: ^0.69.0
+  flutter_svg: ^2.0.10+1
+  http: ^1.2.1
+  dio: ^5.4.3+1
+  shared_preferences: ^2.2.3
+  intl: ^0.19.0
+  url_launcher: ^6.3.0
+  share_plus: ^9.0.0
+  google_fonts: ^6.2.1
+  flutter_animate: ^4.5.0
+  ffi: ^2.1.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/logo.png"
+  adaptive_icon_background: "#1B5E20"
+  adaptive_icon_foreground: "assets/icons/logo.png"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/pieces/svg/
+    - assets/icons/
+    - assets/data/
