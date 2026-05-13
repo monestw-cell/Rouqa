@@ -5,7 +5,7 @@
 library;
 
 import 'dart:math';
-import '../models/chess_models.dart';
+import '../../models/chess_models.dart';
 
 /// نوع اللغز التكتيكي
 enum PuzzleTheme {
