@@ -37,7 +37,7 @@ class ThrottledAnalysisData {
     this.bestMove,
     this.currentDepth = 0,
     this.isDepthStable = false,
-    this.lastUpdateTime = DateTime.fromMillisecondsSinceEpoch(0),
+    this.lastUpdateTime = const _Epoch(),
   });
 
   ThrottledAnalysisData copyWith({
